@@ -76,7 +76,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION TESTIMONI (Pura-puranya) */}
+      {/* SECTION TESTIMONI (Pura-puranya WKWKWKKW) */}
       <section className="py-20 bg-white px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">

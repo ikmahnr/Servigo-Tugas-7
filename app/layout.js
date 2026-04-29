@@ -8,7 +8,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="font-['Plus_Jakarta_Sans'] bg-white text-gray-900">
         
-        {/* NAVBAR - Semua Menu Tetap Muncul Walau Layar Kecil */}
+        {/* NAVBAR  */}
         <nav className="bg-white py-4 shadow-sm sticky top-0 z-50 border-b border-gray-100">
           <div className="container mx-auto px-2 md:px-6 flex justify-between items-center">
             
@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
               <span className="text-[#2563EB]">Go</span>
             </a>
 
-            {/* MENU TENGAH - Sekarang Tidak Pakai 'hidden' lagi */}
+            {/* MENU TENGAHHHHHH  */}
             <div className="flex items-center space-x-2 md:space-x-8 font-semibold text-gray-600 text-[10px] sm:text-xs md:text-base">
               <a href="/" className="hover:text-[#2563EB] transition px-1">Home</a>
               <a href="/about" className="hover:text-[#2563EB] transition px-1">About</a>
@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
               <a href="/contact" className="hover:text-[#2563EB] transition px-1">Contact</a>
             </div>
 
-            {/* TOMBOL DAFTAR */}
+            {/* TOMBOL DAFTARRR*/}
             <div className="flex-shrink-0 ml-2">
               <a href="#" className="bg-[#2563EB] text-white px-3 py-1.5 md:px-6 md:py-2 rounded-full font-bold shadow-md text-[10px] md:text-base">
                 Daftar

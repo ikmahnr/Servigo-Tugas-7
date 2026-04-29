@@ -27,7 +27,7 @@ export default function ServicesPage() {
             <button className="w-full py-3 bg-gray-50 text-[#2563EB] font-bold rounded-xl hover:bg-blue-600 hover:text-white transition">Pesan Jasa</button>
           </div>
 
-          {/* 2. JASA DIGITAL (Ini yang tadi ketinggalan) */}
+          {/* 2. JASA DIGITAL */}
           <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all">
             <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-2xl mb-6">💻</div>
             <h3 className="text-2xl font-bold text-[#1F2937] mb-4">Jasa Digital</h3>

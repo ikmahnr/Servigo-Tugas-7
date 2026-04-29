@@ -1,6 +1,6 @@
 // Tambahkan async di depan fungsi
 export default async function ServiceDetail({ params }) {
-  // Kita harus pakai await params untuk mengambil ID-nya
+  // SMOGA NILAINYA BAGUS
   const { id } = await params;
   const idJasa = id;
 

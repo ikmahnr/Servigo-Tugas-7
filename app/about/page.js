@@ -1,7 +1,7 @@
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white pb-20">
-      {/* HERO ABOUT */}
+      {/*  ABOUT */}
       <section className="bg-[#F8FAFC] py-20 px-6 border-b border-gray-100">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#1F2937] mb-6">Tentang ServiGo</h1>
@@ -11,7 +11,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* VISI & MISI */}
+      {/* VISI N MISI ANZAYYYY */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-5xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
