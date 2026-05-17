@@ -80,7 +80,7 @@ export default function ServiceDetailPage({ params }) {
         nomorInvoice: 'INV-' + Math.floor(100000 + Math.random() * 900000)
       })
       setShowInvoice(true)
-      setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
+      // Note: Data namaPemberi tidak langsung di-reset di sini agar string namanya bisa terbaca oleh template teks WhatsApp
     }
     setLoading(false)
   }
@@ -177,8 +177,26 @@ export default function ServiceDetailPage({ params }) {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              <button onClick={() => { setShowInvoice(false); setInvoiceData(null); }} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all">
-                Saya Sudah Transfer & Konfirmasi
+              {/* INTEGRASI TOMBOL KONFIRMASI WHATSAPP OTOMATIS */}
+              <button 
+                onClick={() => {
+                  // GANTI DENGAN NOMOR HANDPHONE KAMU (Gunakan kode negara 62 di depan)
+                  const nomorWA = "6285712345678" 
+                  
+                  // Template pesan teks rapi otomatis untuk dikirim ke WhatsApp
+                  const teksPesan = `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${namaPemberi || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
+                  
+                  // Membuka WhatsApp di tab browser baru
+                  window.open(`https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(teksPesan)}`, '_blank')
+
+                  // Menutup invoice dan membersihkan input form di website
+                  setShowInvoice(false)
+                  setInvoiceData(null)
+                  setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
+                }} 
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                📱 Kirim Bukti & Konfirmasi via WhatsApp
               </button>
             </div>
           )}
