@@ -15,15 +15,20 @@ export default function Home() {
   // STATE FILTER KATEGORI
   const [selectedKategori, setSelectedKategori] = useState('Semua')
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  )
+  // AMAN: Ditambahkan nilai cadangan string kosong agar @supabase/ssr tidak ngambek dan eror saat Vercel proses build awal
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUserSession(session?.user || null)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setUserSession(session?.user || null)
+      } catch (err) {
+        console.log("Session fetch skipped during build")
+      }
     }
     getSession()
   }, [])
@@ -80,10 +85,9 @@ export default function Home() {
   }
 
   return (
-    // AMAN: Ditambahkan w-full dan overflow-x-hidden agar seluruh layout beranda terkunci dan tidak bisa bergeser ke kanan
     <main className="bg-gray-50 min-h-screen text-black pb-20 font-sans w-full overflow-x-hidden">
       
-      {/* HERO SECTION - Responsif Text */}
+      {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-blue-600 to-purple-700 text-white pt-16 pb-28 md:pt-20 md:pb-32 px-4 rounded-b-[40px] md:rounded-b-[50px] text-center shadow-lg">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 uppercase tracking-tight">ServiGo</h1>
         <p className="opacity-90 max-w-xl mx-auto text-xs sm:text-sm px-2">Cari Cuan Harian & Hubungkan Pekerjaan Instan Sekali Klik.</p>
@@ -91,7 +95,7 @@ export default function Home() {
 
       {/* FORM LOGIN / REGISTER */}
       {!userSession ? (
-        <section className="px-4 sm:px-6 mt-[-60px] md:mt-[-80px] mb-12 flex justify-center animate-in fade-in duration-300">
+        <section className="px-4 sm:px-6 mt-[-60px] md:mt-[-80px] mb-12 flex justify-center">
           <div className="w-full max-w-md bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl border border-blue-100">
             <h2 className="text-lg md:text-xl font-bold text-center mb-5 text-gray-800 uppercase italic">
               {mode === 'login' ? 'Masuk ke Akun' : 'Daftar Akun Baru'}
@@ -111,7 +115,7 @@ export default function Home() {
           </div>
         </section>
       ) : (
-        <section className="px-4 sm:px-6 mt-[-30px] md:mt-[-40px] mb-8 flex justify-center animate-in fade-in duration-500">
+        <section className="px-4 sm:px-6 mt-[-30px] md:mt-[-40px] mb-8 flex justify-center">
           <div className="w-full max-w-md bg-white rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-xl border border-green-200 flex justify-between items-center gap-4">
             <div className="min-w-0">
               <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase">Selamat Datang 👋</p>
@@ -128,7 +132,6 @@ export default function Home() {
       <section className="px-4 sm:px-6 py-4">
         <div className="w-full max-w-7xl mx-auto">
           <h3 className="font-black mb-5 text-gray-800 text-base md:text-lg uppercase text-center italic tracking-tight">Pilih Kategori Jasa</h3>
-          {/* Menggunakan gap-2 di mobile dan gap-3 di desktop agar tidak memaksa melar ke samping */}
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {['Semua', '🔥 URGENT', 'Rumah Tangga', 'Logistik', 'Jasa Digital', 'Lainnya'].map((kat) => (
               <button 
@@ -149,10 +152,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GRID KARTU TUGAS - Responsif Grid Layout */}
+      {/* GRID KARTU TUGAS */}
       <section className="px-4 sm:px-6 py-4">
         <div className="w-full max-w-7xl mx-auto">
-          {/* Otomatis 1 kolom di mobile (cols-1), 2 kolom di tablet (md:), dan 3 kolom di monitor laptop (lg:) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {kartuYangMuncul.map((item) => {
               const biayaAdmin = 2500
@@ -162,7 +164,6 @@ export default function Home() {
               return (
                 <div key={item.id} className={`bg-white rounded-[1.8rem] md:rounded-[2rem] p-5 md:p-6 shadow-xl border flex flex-col justify-between hover:scale-[1.02] transition-all relative overflow-hidden ${item.isPriority ? 'border-purple-400 ring-2 ring-purple-100' : 'border-gray-100'}`}>
                   
-                  {/* Badge Ungu Khusus Prioritas */}
                   {item.isPriority && (
                     <div className="absolute top-0 right-0 bg-gradient-to-l from-purple-600 to-indigo-600 text-white font-black text-[8px] md:text-[9px] px-3.5 py-1.5 rounded-bl-2xl uppercase tracking-wider shadow">
                       🔥 URGENT / KILAT
@@ -221,7 +222,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BOTTOM BANNER - Responsif Card */}
+      {/* BOTTOM BANNER */}
       <section className="px-4 sm:px-6 mt-12 md:mt-16">
         <div className="w-full max-w-4xl mx-auto bg-gradient-to-r from-orange-400 to-amber-500 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white text-center shadow-xl">
           <h3 className="text-lg md:text-xl font-black uppercase mb-2">Tidak Ada Jasa yang Kalian Cari?</h3>

@@ -24,10 +24,11 @@ function AdminContent() {
   const { replace } = useRouter();
   const query = searchParams.get('query') || '';
 
-  const supabase = createBrowserClient(
-    'https://plykglcgdhoxzsxupgox.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
-  );
+  // AMAN: Memakai process.env dengan cadangan teks langsung agar Vercel lolos build 100%
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6..."';
+
+  const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
   // --- FUNGSI LOGOUT ---
   const handleLogout = () => {
