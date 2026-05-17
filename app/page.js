@@ -15,9 +15,9 @@ export default function Home() {
   // STATE FILTER KATEGORI
   const [selectedKategori, setSelectedKategori] = useState('Semua')
 
-  // AMAN: Ditambahkan nilai cadangan string kosong agar @supabase/ssr tidak ngambek dan eror saat Vercel proses build awal
+  // AMAN: Ditambahkan nilai cadangan string kunci asli agar @supabase/ssr tidak ngambek dan eror saat Vercel proses build awal
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6"cGx5a2dsY2dkaG94enN4dXBnb3giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NzM4NTEwMywiZXhwIjoyMDkyOTYxMTAzfQ.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
 
   const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
