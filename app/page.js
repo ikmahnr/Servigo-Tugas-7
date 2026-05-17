@@ -15,9 +15,9 @@ export default function Home() {
   // STATE FILTER KATEGORI
   const [selectedKategori, setSelectedKategori] = useState('Semua')
 
-  // AMAN: Ditambahkan nilai cadangan string kunci asli agar @supabase/ssr tidak ngambek dan eror saat Vercel proses build awal
+  // URL & KEY SUPABASE (Sudah bersih dari kebocoran tanda kutip)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6"cGx5a2dsY2dkaG94enN4dXBnb3giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NzM4NTEwMywiZXhwIjoyMDkyOTYxMTAzfQ.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
 
   const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
@@ -49,7 +49,7 @@ export default function Home() {
     { id: 12, kategori: 'Lainnya', nama: 'Jasa Packing Paket Penjualan', hargaAsli: 2000, satuan: '/ Paket', lokasi: 'Kapuk, Jakarta Barat', wa: '6281234567890', icon: '🎁', isPriority: false }
   ]
 
-  // LOGIKA FILTER KATEGORI BARU (TERMASUK TOMBOL URGENT)
+  // LOGIKA FILTER KATEGORI BARU
   const kartuYangMuncul = selectedKategori === 'Semua' 
     ? semuaKartuTugas 
     : selectedKategori === '🔥 URGENT'
@@ -101,8 +101,8 @@ export default function Home() {
               {mode === 'login' ? 'Masuk ke Akun' : 'Daftar Akun Baru'}
             </h2>
             <form onSubmit={handleAuth} className="space-y-4">
-              <input type="email" placeholder="Masukkan Email" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" onChange={(e) => setEmail(e.target.value)} required />
-              <input type="password" placeholder="Masukkan Password" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" onChange={(e) => setPassword(e.target.value)} required />
+              <input type="email" placeholder="Masukkan Email" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black" onChange={(e) => setEmail(e.target.value)} required />
+              <input type="password" placeholder="Masukkan Password" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black" onChange={(e) => setPassword(e.target.value)} required />
               <button disabled={loading} className="w-full bg-blue-600 text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black shadow-lg hover:bg-blue-700 transition-all uppercase text-xs tracking-wider disabled:bg-gray-300">
                 {loading ? 'Sabar Ya...' : mode === 'login' ? 'Masuk Sekarang' : 'Daftar Sekarang'}
               </button>
@@ -198,12 +198,15 @@ export default function Home() {
                   </div>
 
                   {userSession ? (
-                    <button 
-                      onClick={() => window.open(`https://wa.me/${item.wa}?text=Halo%20Admin,%20saya%20berminat%20mengambil%20pekerjaan%20${encodeURIComponent(item.nama)}%20di%20${encodeURIComponent(item.lokasi)}%20dengan%20Total%20Bayar%20Rp%20${totalBayar.toLocaleString('id-ID')}`, '_blank')}
-                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs py-3 rounded-xl uppercase tracking-wider mt-5 md:mt-6 shadow-md transition-all flex justify-center items-center gap-2"
+                    /* REPARASI UTAMA: MENGGUNAKAN ANCHOR TAG MURNI AGAR KONEKSI WHATSAPP AMAN & ANTI-BLOCK */
+                    <a 
+                      href={`https://api.whatsapp.com/send?phone=${item.wa}&text=${encodeURIComponent(`Halo Admin, saya berminat mengambil pekerjaan ${item.nama} di ${item.lokasi} dengan Total Bayar Rp ${totalBayar.toLocaleString('id-ID')}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs py-3 rounded-xl uppercase tracking-wider mt-5 md:mt-6 shadow-md transition-all flex justify-center items-center gap-2 text-center block"
                     >
                       💬 Ambil Tugas & Hubungi WA
-                    </button>
+                    </a>
                   ) : (
                     <button 
                       onClick={() => {
@@ -227,19 +230,28 @@ export default function Home() {
         <div className="w-full max-w-4xl mx-auto bg-gradient-to-r from-orange-400 to-amber-500 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white text-center shadow-xl">
           <h3 className="text-lg md:text-xl font-black uppercase mb-2">Tidak Ada Jasa yang Kalian Cari?</h3>
           <p className="text-xs opacity-90 mb-6 max-w-md mx-auto px-2">Sampaikan kebutuhan kerjamu ke Admin. Kami akan langsung hubungkan ke pencari kerja yang siap sedia!</p>
-          <button 
-            onClick={() => {
-              if(userSession) {
-                window.open('https://wa.me/6281234567890?text=Halo%20Admin%20ServiGo,%20saya%20butuh%20jasa%20custom', '_blank')
-              } else {
+          
+          {userSession ? (
+            /* REPARASI BANNER BOTTOM: MEMAKAI ANCHOR LINK MURNI JUGA */
+            <a 
+              href={`https://api.whatsapp.com/send?phone=6281234567890&text=${encodeURIComponent('Halo Admin ServiGo, saya butuh jasa custom')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block w-full sm:w-auto bg-white text-orange-600 font-black px-6 py-3.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-xs uppercase tracking-widest shadow-md hover:bg-orange-50 transition-all text-center"
+            >
+              Hubungi Admin Yuk! 📞
+            </a>
+          ) : (
+            <button 
+              onClick={() => {
                 setMessage('Silakan login terlebih dahulu untuk menghubungi Admin!');
                 window.scrollTo({ top: 150, behavior: 'smooth' });
-              }
-            }}
-            className="w-full sm:w-auto bg-white text-orange-600 font-black px-6 py-3.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-xs uppercase tracking-widest shadow-md hover:bg-orange-50 transition-all"
-          >
-            {userSession ? 'Hubungi Admin Yuk! 📞' : '🔒 Login untuk Hubungi Admin'}
-          </button>
+              }}
+              className="w-full sm:w-auto bg-gray-200 text-gray-400 font-black px-6 py-3.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed"
+            >
+              🔒 Login untuk Hubungi Admin
+            </button>
+          )}
         </div>
       </section>
 
