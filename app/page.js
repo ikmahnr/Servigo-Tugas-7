@@ -15,7 +15,7 @@ export default function Home() {
   // STATE FILTER KATEGORI
   const [selectedKategori, setSelectedKategori] = useState('Semua')
 
-  // URL & KEY SUPABASE (Sudah bersih dari kebocoran tanda kutip)
+  // URL & KEY SUPABASE
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
 
@@ -33,20 +33,20 @@ export default function Home() {
     getSession()
   }, [])
 
-  // DATA KARTU TUGAS (Upah Pokok Sebelum Ditambah Admin/Prioritas)
+  // DATA KARTU TUGAS (Nomor WA diarahkan ke Admin: 62856767655)
   const semuaKartuTugas = [
-    { id: 1, kategori: 'Rumah Tangga', nama: 'Jasa Setrika & Lipat Baju', hargaAsli: 25000, satuan: '/ Jam', lokasi: 'Kapuk, Jakarta Barat', wa: '6281234567890', icon: '🧺', isPriority: true },
-    { id: 2, kategori: 'Rumah Tangga', nama: 'Jasa Bersih-bersih Rumah (Nyapu/Ngepel)', hargaAsli: 50000, satuan: '', lokasi: 'Cengkareng, Jakarta Barat', wa: '6281234567890', icon: '🧹', isPriority: false },
-    { id: 3, kategori: 'Rumah Tangga', nama: 'Jasa Cuci Baju & Gosok', hargaAsli: 30000, satuan: '', lokasi: 'Grogol, Jakarta Barat', wa: '6281234567890', icon: '🧼', isPriority: false },
-    { id: 4, kategori: 'Logistik', nama: 'Bantu Pindahan Rumah/Kos', hargaAsli: 150000, satuan: '', lokasi: 'Kalideres, Jakarta Barat', wa: '6281234567890', icon: '🚚', isPriority: true },
-    { id: 5, kategori: 'Logistik', nama: 'Bantu Kirim & Antar Barang', hargaAsli: 75000, satuan: '', lokasi: 'Kapuk, Jakarta Barat', wa: '6281234567890', icon: '📦', isPriority: false },
-    { id: 6, kategori: 'Logistik', nama: 'Bantu Antar Paket Kilat', hargaAsli: 15000, satuan: '', lokasi: 'Kembangan, Jakarta Barat', wa: '6281234567890', icon: '🛵', isPriority: false },
-    { id: 7, kategori: 'Jasa Digital', nama: 'Jasa Pembuatan CV Kreatif', hargaAsli: 35000, satuan: '', lokasi: 'Online / Jakarta', wa: '6281234567890', icon: '📄', isPriority: false },
-    { id: 8, kategori: 'Jasa Digital', nama: 'Jasa Ketik Tugas & Dokumen', hargaAsli: 5000, satuan: '/ Lembar', lokasi: 'Online', wa: '6281234567890', icon: '⌨️', isPriority: false },
-    { id: 9, kategori: 'Jasa Digital', nama: 'Joki Tugas Kuliah & Sekolah', hargaAsli: 100000, satuan: '', lokasi: 'Online', wa: '6281234567890', icon: '📚', isPriority: true },
-    { id: 10, kategori: 'Lainnya', nama: 'Jasa Jaga Orang Sakit di RS', hargaAsli: 150000, satuan: '/ Hari', lokasi: 'Cengkareng, Jakarta Barat', wa: '6281234567890', icon: '🏥', isPriority: false },
-    { id: 11, kategori: 'Lainnya', nama: 'Jasa Antre Tiket / Sembako', hargaAsli: 20000, satuan: '', lokasi: 'Kebon Jeruk, Jakarta Barat', wa: '6281234567890', icon: '🚶', isPriority: false },
-    { id: 12, kategori: 'Lainnya', nama: 'Jasa Packing Paket Penjualan', hargaAsli: 2000, satuan: '/ Paket', lokasi: 'Kapuk, Jakarta Barat', wa: '6281234567890', icon: '🎁', isPriority: false }
+    { id: 1, kategori: 'Rumah Tangga', nama: 'Jasa Setrika & Lipat Baju', hargaAsli: 25000, satuan: '/ Jam', lokasi: 'Kapuk, Jakarta Barat', wa: '62856767655', icon: '🧺', isPriority: true },
+    { id: 2, kategori: 'Rumah Tangga', nama: 'Jasa Bersih-bersih Rumah (Nyapu/Ngepel)', hargaAsli: 50000, satuan: '', lokasi: 'Cengkareng, Jakarta Barat', wa: '62856767655', icon: '🧹', isPriority: false },
+    { id: 3, kategori: 'Rumah Tangga', nama: 'Jasa Cuci Baju & Gosok', hargaAsli: 30000, satuan: '', lokasi: 'Grogol, Jakarta Barat', wa: '62856767655', icon: '🧼', isPriority: false },
+    { id: 4, kategori: 'Logistik', nama: 'Bantu Pindahan Rumah/Kos', hargaAsli: 150000, satuan: '', lokasi: 'Kalideres, Jakarta Barat', wa: '62856767655', icon: '🚚', isPriority: true },
+    { id: 5, kategori: 'Logistik', nama: 'Bantu Kirim & Antar Barang', hargaAsli: 75000, satuan: '', lokasi: 'Kapuk, Jakarta Barat', wa: '62856767655', icon: '📦', isPriority: false },
+    { id: 6, kategori: 'Logistik', nama: 'Bantu Antar Paket Kilat', hargaAsli: 15000, satuan: '', lokasi: 'Kembangan, Jakarta Barat', wa: '62856767655', icon: '🛵', isPriority: false },
+    { id: 7, kategori: 'Jasa Digital', nama: 'Jasa Pembuatan CV Kreatif', hargaAsli: 35000, satuan: '', lokasi: 'Online / Jakarta', wa: '62856767655', icon: '📄', isPriority: false },
+    { id: 8, kategori: 'Jasa Digital', nama: 'Jasa Ketik Tugas & Dokumen', hargaAsli: 5000, satuan: '/ Lembar', lokasi: 'Online', wa: '62856767655', icon: '⌨️', isPriority: false },
+    { id: 9, kategori: 'Jasa Digital', nama: 'Joki Tugas Kuliah & Sekolah', hargaAsli: 100000, satuan: '', lokasi: 'Online', wa: '62856767655', icon: '📚', isPriority: true },
+    { id: 10, kategori: 'Lainnya', nama: 'Jasa Jaga Orang Sakit di RS', hargaAsli: 150000, satuan: '/ Hari', lokasi: 'Cengkareng, Jakarta Barat', wa: '62856767655', icon: '🏥', isPriority: false },
+    { id: 11, kategori: 'Lainnya', nama: 'Jasa Antre Tiket / Sembako', hargaAsli: 20000, satuan: '', lokasi: 'Kebon Jeruk, Jakarta Barat', wa: '62856767655', icon: '🚶', isPriority: false },
+    { id: 12, kategori: 'Lainnya', nama: 'Jasa Packing Paket Penjualan', hargaAsli: 2000, satuan: '/ Paket', lokasi: 'Kapuk, Jakarta Barat', wa: '62856767655', icon: '🎁', isPriority: false }
   ]
 
   // LOGIKA FILTER KATEGORI BARU
@@ -198,9 +198,9 @@ export default function Home() {
                   </div>
 
                   {userSession ? (
-                    /* REPARASI UTAMA: MENGGUNAKAN ANCHOR TAG MURNI AGAR KONEKSI WHATSAPP AMAN & ANTI-BLOCK */
+                    /* DIREPARASI: Minta user untuk mengirimkan bukti transfer secara eksplisit */
                     <a 
-                      href={`https://api.whatsapp.com/send?phone=${item.wa}&text=${encodeURIComponent(`Halo Admin, saya berminat mengambil pekerjaan ${item.nama} di ${item.lokasi} dengan Total Bayar Rp ${totalBayar.toLocaleString('id-ID')}`)}`}
+                      href={`https://api.whatsapp.com/send?phone=${item.wa}&text=${encodeURIComponent(`Halo Admin ServiGo, saya berminat mengambil pekerjaan: ${item.nama} di ${item.lokasi}.\n\nTotal Pembayaran: Rp ${totalBayar.toLocaleString('id-ID')}.\n\nBerikut saya lampirkan bukti transfer saya agar bisa langsung diproses.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs py-3 rounded-xl uppercase tracking-wider mt-5 md:mt-6 shadow-md transition-all flex justify-center items-center gap-2 text-center block"
@@ -232,9 +232,9 @@ export default function Home() {
           <p className="text-xs opacity-90 mb-6 max-w-md mx-auto px-2">Sampaikan kebutuhan kerjamu ke Admin. Kami akan langsung hubungkan ke pencari kerja yang siap sedia!</p>
           
           {userSession ? (
-            /* REPARASI BANNER BOTTOM: MEMAKAI ANCHOR LINK MURNI JUGA */
+            /* DIREPARASI: Mengarah ke nomor admin asli */
             <a 
-              href={`https://api.whatsapp.com/send?phone=6281234567890&text=${encodeURIComponent('Halo Admin ServiGo, saya butuh jasa custom')}`}
+              href={`https://api.whatsapp.com/send?phone=62856767655&text=${encodeURIComponent('Halo Admin ServiGo, saya butuh jasa custom kerjaan harian. Mohon infonya ya.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block w-full sm:w-auto bg-white text-orange-600 font-black px-6 py-3.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-xs uppercase tracking-widest shadow-md hover:bg-orange-50 transition-all text-center"

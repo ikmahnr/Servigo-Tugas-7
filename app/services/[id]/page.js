@@ -27,7 +27,7 @@ export default function ServiceDetailPage({ params }) {
   const [noHpMitra, setNoHpMitra] = useState('')
   const [keahlian, setKeahlian] = useState('')
 
-  // URL & KEY SUPABASE (Sudah dibersihkan dari tanda kutip bocor)
+  // URL & KEY SUPABASE
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
 
@@ -177,15 +177,15 @@ export default function ServiceDetailPage({ params }) {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              {/* REPARASI TOMBOL: MENGGUNAKAN HTML LINK MURNI AGAR TIDAK DIBLOKIR BROWSER */}
+              {/* REPARASI UTAMA: MENGGUNAKAN NOMOR ADMIN ASLI (62856767655) & ENCODE LINK AGAR TETAP AMAN DI HP */}
               <a 
-                href={`https://api.whatsapp.com/send?phone=6285712345678&text=${encodeURIComponent(
+                href={`https://api.whatsapp.com/send?phone=62856767655&text=${encodeURIComponent(
                   `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${invoiceData.namaPengirimData || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  // Berikan jeda waktu agar browser sempat membuka halaman WA sebelum form di-clear
+                  // Delay 500ms saja supaya browser sempat memicu pembukaan tab WA sebelum form dibersihkan
                   setTimeout(() => {
                     setShowInvoice(false)
                     setInvoiceData(null)
