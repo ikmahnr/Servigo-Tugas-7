@@ -4,28 +4,9 @@ import { useState, useEffect } from 'react'
 
 export default function ServiceDetailPage({ params }) {
   const [userSession, setUserSession] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
-
-  // TOGGLE FORM TABS ('lowongan' atau 'mitra')
-  const [activeForm, setActiveForm] = useState('lowongan')
-
-  // STATE FORM LOWONGAN (PEMBERI KERJA)
-  const [namaPemberi, setNamaPemberi] = useState('')
-  const [kontakPemberi, setKontakPemberi] = useState('')
-  const [butuhJasa, setButuhJasa] = useState('')
-  const [lokasiKerja, setLokasiKerja] = useState('')
-  const [gajiTawaran, setGajiTawaran] = useState('')
-  const [isPriority, setIsPriority] = useState(false)
-  
-  // STATE INVOICE SETELAH BERHASIL SIMPAN
-  const [showInvoice, setShowInvoice] = useState(false)
   const [invoiceData, setInvoiceData] = useState(null)
-
-  // STATE FORM MITRA (PENCARI KERJA)
-  const [namaMitra, setNamaMitra] = useState('')
-  const [noHpMitra, setNoHpMitra] = useState('')
-  const [keahlian, setKeahlian] = useState('')
 
   // URL & KEY SUPABASE
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
@@ -34,127 +15,95 @@ export default function ServiceDetailPage({ params }) {
   const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
   useEffect(() => {
-    const checkUser = async () => {
+    const initializeData = async () => {
+      setLoading(true)
+      
+      // 1. Jalankan Cek Sesi Pengguna
       try {
         const { data: { session } } = await supabase.auth.getSession()
         setUserSession(session?.user || null)
+        
+        if (!session?.user) {
+          setLoading(false)
+          return
+        }
       } catch (err) {
         console.log("Session bypass on building time")
       }
-    }
-    checkUser()
-  }, [])
 
-  // 1. AKSI: SIMPAN LOWONGAN + HITUNG INVOICE MANDIRI
-  const handleSimpanLowongan = async (e) => {
-    e.preventDefault()
-    if (!userSession) return
-    setLoading(true)
-    setMessage('')
+      // 2. Ambil Data Lowongan Spesifik Berdasarkan ID dari URL
+      const targetId = params?.id
+      if (targetId) {
+        const { data, error } = await supabase
+          .from('lowongan')
+          .select('*')
+          .eq('id', targetId)
+          .single() // Ambil satu data murni
 
-    const upahMurni = Number(gajiTawaran)
-    const biayaAdmin = 2500
-    const biayaPrioritas = isPriority ? 5000 : 0
-    const totalHarusDibayar = upahMurni + biayaAdmin + biayaPrioritas
+        if (error) {
+          setMessage('❌ Gagal memuat data tagihan: ' + error.message)
+        } else if (data) {
+          // Bersihkan string nominal gaji dari DB (misal "Rp 157.500") untuk kalkulasi balik jika diperlukan rinciannya
+          const cleanGajiStr = data.gaji ? data.gaji.replace(/[^\d]/g, '') : '0'
+          const totalHarusDibayar = Number(cleanGajiStr)
+          
+          // Dekonstruksi rincian biaya (Admin 2500, Prioritas 5000 jika true)
+          const biayaAdmin = 2500
+          const biayaPrioritas = data.is_priority ? 5000 : 0
+          const upahMurni = totalHarusDibayar - biayaAdmin - biayaPrioritas
 
-    const { error } = await supabase.from('lowongan').insert([
-      { 
-        nama_pemberi: namaPemberi, 
-        kontak: kontakPemberi, 
-        butuh_jasa: butuhJasa, 
-        lokasi: lokasiKerja, 
-        gaji: `Rp ${totalHarusDibayar.toLocaleString('id-ID')}`,
-        is_priority: isPriority,
-        status_bayar: 'Pending Verification'
+          setInvoiceData({
+            nomorInvoice: `INV-${100000 + Number(targetId) % 900000}`,
+            namaPengirimData: data.nama_pemberi,
+            upahMurni: upahMurni > 0 ? upahMurni : totalHarusDibayar,
+            biayaAdmin: biayaAdmin,
+            biayaPrioritas: biayaPrioritas,
+            totalHarusDibayar: totalHarusDibayar
+          })
+        }
       }
-    ])
-
-    if (error) {
-      setMessage('❌ Gagal pasang lowongan: ' + error.message)
-    } else {
-      setInvoiceData({
-        upahMurni,
-        biayaAdmin,
-        biayaPrioritas,
-        totalHarusDibayar,
-        nomorInvoice: 'INV-' + Math.floor(100000 + Math.random() * 900000),
-        namaPengirimData: namaPemberi
-      })
-      setShowInvoice(true)
+      setLoading(false)
     }
-    setLoading(false)
-  }
 
-  // 2. AKSI: DAFTAR MITRA OTOMATIS MASUK SUPABASE
-  const handleDaftarMitra = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage('')
-
-    const { error } = await supabase.from('mitra').insert([
-      {
-        nama_mitra: namaMitra,
-        no_hp: noHpMitra,
-        keahlian: keahlian,
-        email_pendaftar: userSession.email
-      }
-    ])
-
-    if (error) {
-      setMessage('❌ Gagal mendaftar: ' + error.message)
-    } else {
-      setMessage('✅ Berhasil! Profil kamu sudah aktif di sistem database Mitra ServiGo.')
-      setNamaMitra(''); setNoHpMitra(''); setKeahlian('');
-    }
-    setLoading(false)
-  }
+    initializeData()
+  }, [params?.id])
 
   return (
     <main className="bg-gray-50 min-h-screen text-black pb-20 font-sans w-full overflow-x-hidden">
       <section className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-12 md:py-16 px-4 rounded-b-[30px] md:rounded-b-[40px] text-center shadow-md">
         <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight mb-2">Layanan ServiGo</h1>
-        <p className="opacity-90 max-w-md mx-auto text-[10px] md:text-xs uppercase font-semibold px-2">Detail Rute Id Proyek Terintegrasi</p>
+        <p className="opacity-90 max-w-md mx-auto text-[10px] md:text-xs uppercase font-semibold px-2">Gerbang Verifikasi Invoice Resmi</p>
       </section>
 
-      {!userSession ? (
-        <section className="px-4 sm:px-6 mt-8 max-w-xl mx-auto animate-in fade-in duration-300">
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-[2rem] p-6 md:p-8 text-center shadow-sm flex flex-col items-center">
-            <span className="text-4xl animate-bounce">🔒</span>
-            <h3 className="font-black uppercase text-sm mt-3 tracking-wide">Akses Layanan Terkunci!</h3>
+      {loading ? (
+        <section className="px-4 mt-12 max-w-xl mx-auto text-center">
+          <div className="text-purple-600 font-bold text-xs uppercase tracking-widest animate-pulse">
+            ⏳ Menyinkronkan Data Transaksi...
+          </div>
+        </section>
+      ) : !userSession ? (
+        <section className="px-4 sm:px-6 mt-8 max-w-xl mx-auto">
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-[2rem] p-6 text-center shadow-sm flex flex-col items-center">
+            <span className="text-4xl">🔒</span>
+            <h3 className="font-black uppercase text-sm mt-3 tracking-wide">Akses Terkunci!</h3>
             <p className="text-xs opacity-90 mt-2 max-w-sm leading-relaxed">
-              Kamu wajib Masuk atau Daftar akun terlebih dahulu di sistem ekosistem ServiGo sebelum dapat mengakses menu formulir penempatan ini.
+              Silakan login terlebih dahulu untuk melihat invoice detail penempatan pekerjaan ini.
             </p>
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 w-full justify-center">
-              <button onClick={() => window.location.href = '/login'} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider shadow-md hover:opacity-90 transition-all flex-1 sm:flex-none">
-                🔑 Masuk / Login Akun
-              </button>
-              <button onClick={() => window.location.href = '/'} className="bg-white border border-amber-200 text-amber-800 font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider hover:bg-amber-100 transition-all flex-1 sm:flex-none">
-                ← Kembali ke Beranda
-              </button>
-            </div>
+            <button onClick={() => window.location.href = '/login'} className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider shadow-md w-full">
+              🔑 Masuk Sekarang
+            </button>
           </div>
         </section>
       ) : (
         <section className="px-4 sm:px-6 mt-8 max-w-xl mx-auto animate-in fade-in duration-500">
           
-          {!showInvoice && (
-            <div className="flex bg-gray-200 p-1.5 rounded-2xl mb-6 md:mb-8 shadow-inner">
-              <button onClick={() => { setActiveForm('lowongan'); setMessage(''); }} className={`flex-1 py-3 text-[10px] md:text-[11px] font-black rounded-xl uppercase tracking-wider transition-all ${activeForm === 'lowongan' ? 'bg-white shadow text-purple-600' : 'text-gray-500'}`}>
-                📢 Pasang Lowongan
-              </button>
-              <button onClick={() => { setActiveForm('mitra'); setMessage(''); }} className={`flex-1 py-3 text-[10px] md:text-[11px] font-black rounded-xl uppercase tracking-wider transition-all ${activeForm === 'mitra' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>
-                💼 Daftar Jadi Mitra
-              </button>
-            </div>
-          )}
-
-          {message && !showInvoice && (
-            <div className={`p-4 rounded-xl text-xs font-bold text-center mb-6 ${message.includes('✅') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+          {message && (
+            <div className="p-4 rounded-xl text-xs font-bold text-center mb-6 bg-red-50 text-red-700 border border-red-200">
               {message}
             </div>
           )}
 
-          {showInvoice && invoiceData && (
+          {invoiceData ? (
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl border-2 border-purple-200 text-center animate-in zoom-in-95 duration-300">
               <div className="text-4xl mb-2">🧾</div>
               <h2 className="text-lg font-black text-gray-800 uppercase tracking-tight">Invoice Pembayaran</h2>
@@ -177,7 +126,7 @@ export default function ServiceDetailPage({ params }) {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              {/* REPARASI UTAMA: MENGGUNAKAN NOMOR ADMIN ASLI (62856767655) & ENCODE LINK AGAR TETAP AMAN DI HP */}
+              {/* ACTION BUTTON UTAMA MENUJU WA ADMIN */}
               <a 
                 href={`https://api.whatsapp.com/send?phone=62856767655&text=${encodeURIComponent(
                   `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${invoiceData.namaPengirimData || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
@@ -185,102 +134,28 @@ export default function ServiceDetailPage({ params }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  // Delay 500ms saja supaya browser sempat memicu pembukaan tab WA sebelum form dibersihkan
                   setTimeout(() => {
-                    setShowInvoice(false)
-                    setInvoiceData(null)
-                    setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
-                  }, 500)
+                    // Setelah klik konfirmasi, arahkan kembali ke beranda/layanan agar antrean bersih
+                    window.location.href = '/services'
+                  }, 1550)
                 }} 
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 block text-center"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 block text-center animate-pulse"
               >
                 Saya Sudah Transfer & Konfirmasi
               </a>
             </div>
-          )}
-
-          {activeForm === 'lowongan' && !showInvoice && (
-            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-gray-100">
-              <h2 className="text-base md:text-lg font-black text-gray-800 uppercase tracking-tight mb-1">Butuh Tenaga Kerja Dadakan?</h2>
-              <p className="text-[10px] md:text-[11px] text-gray-400 font-bold uppercase mb-6">Lengkapi data lowongan di bawah ini</p>
-              
-              <form onSubmit={handleSimpanLowongan} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Nama Pemberi Tugas</label>
-                  <input type="text" placeholder="Contoh: Ibu Susi / Toko Jaya" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-purple-200" value={namaPemberi} onChange={(e) => setNamaPemberi(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">No. WhatsApp Aktif</label>
-                  <input type="text" placeholder="Contoh: 081234567xxx" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-purple-200" value={kontakPemberi} onChange={(e) => setKontakPemberi(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Pekerjaan Yang Dibutuhkan</label>
-                  <input type="text" placeholder="Contoh: Jaga Kios Baju Seharian" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-purple-200" value={butuhJasa} onChange={(e) => setButuhJasa(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Lokasi Penempatan Kerja</label>
-                  <input type="text" placeholder="Contoh: Cengkareng, Jakbar" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-purple-200" value={lokasiKerja} onChange={(e) => setLokasiKerja(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Tawaran Gaji Pokok Pekerja (Angka Saja)</label>
-                  <input type="number" placeholder="Contoh: 150000" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-purple-200" value={gajiTawaran} onChange={(e) => setGajiTawaran(e.target.value)} required />
-                </div>
-
-                <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 flex items-start gap-3 mt-2">
-                  <input type="checkbox" id="priorityCheck" className="mt-1 w-4 h-4 accent-purple-600 rounded cursor-pointer flex-shrink-0" checked={isPriority} onChange={(e) => setIsPriority(e.target.checked)} />
-                  <label htmlFor="priorityCheck" className="cursor-pointer">
-                    <span className="text-xs font-black text-purple-900 block">🔥 Pasang Sebagai Iklan Prioritas (+Rp 5.000)</span>
-                    <span className="text-[10px] text-purple-600 font-semibold block uppercase mt-0.5">Iklan otomatis tayang di kategori URGENT halaman utama!</span>
-                  </label>
-                </div>
-
-                {gajiTawaran && (
-                  <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-2xl text-[10px] md:text-[11px] font-bold text-gray-600 uppercase space-y-1">
-                    <p>• Upah Murni Pekerja: Rp {Number(gajiTawaran).toLocaleString('id-ID')}</p>
-                    <p>• Biaya Pemeliharaan Aplikasi: Rp 2.500</p>
-                    {isPriority && <p className="text-purple-600">• Fitur Akselerasi Prioritas: Rp 5.000</p>}
-                    <div className="border-t border-dashed border-gray-200 my-2"></div>
-                    <p className="text-xs md:text-sm font-black text-gray-800">Total Biaya Invoice: Rp {(Number(gajiTawaran) + 2500 + (isPriority ? 5000 : 0)).toLocaleString('id-ID')}</p>
-                  </div>
-                )}
-
-                <button type="submit" disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3.5 md:py-4 rounded-xl font-black uppercase text-xs mt-4 disabled:bg-gray-300 transition-all">
-                  {loading ? 'Sedang Memproses...' : '🚀 Pasang Lowongan Sekarang'}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {activeForm === 'mitra' && (
-            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-gray-100">
-              <h2 className="text-base md:text-lg font-black text-gray-800 uppercase tracking-tight mb-1">Gabung Mitra Pencari Kerja</h2>
-              <p className="text-[10px] md:text-[11px] text-gray-400 font-bold uppercase mb-6">Daftarkan dirimu ke database agar langsung mendapat orderan</p>
-              
-              <form onSubmit={handleDaftarMitra} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Nama Lengkap Pekerja</label>
-                  <input type="text" placeholder="Nama lengkap kamu..." className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-blue-200" value={namaMitra} onChange={(e) => setNamaMitra(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Nomor HP / WhatsApp Aktif</label>
-                  <input type="text" placeholder="Contoh: 0857xxxxxx" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-blue-200" value={noHpMitra} onChange={(e) => setNoHpMitra(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Keahlian Utama / Jenis Jasa Serabutan</label>
-                  <input type="text" placeholder="Contoh: Setrika, Nyetir, Bersih-bersih Kos, Angkat Barang" className="w-full bg-gray-50 p-3.5 md:p-4 rounded-xl outline-none text-sm mt-1 text-black border border-transparent focus:border-blue-200" value={keahlian} onChange={(e) => setKeahlian(e.target.value)} required />
-                </div>
-
-                <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 md:py-4 rounded-xl font-black uppercase text-xs mt-2 shadow-md disabled:bg-gray-300 transition-all">
-                  {loading ? 'Menyimpan ke Sistem...' : '💼 Aktifkan Profil Mitra Kerja'}
-                </button>
-              </form>
-            </div>
+          ) : (
+            !message && (
+              <div className="bg-white rounded-[2rem] p-6 text-center shadow border border-gray-100">
+                <p className="text-xs text-gray-500 uppercase font-bold">⚠️ Data transaksi kosong atau tidak terdaftar.</p>
+              </div>
+            )
           )}
 
         </section>
       )}
 
-      <footer className="text-center py-12 md:py-16 opacity-40 text-[10px] font-bold uppercase tracking-[6px] md:tracking-[10px] mt-12 border-t border-gray-100">
+      <footer className="text-center py-12 opacity-40 text-[10px] font-bold uppercase tracking-[6px] mt-12 border-t border-gray-100">
         © {new Date().getFullYear()} ServiGo Indonesia. All Rights Reserved.
       </footer>
     </main>
