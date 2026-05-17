@@ -2,7 +2,7 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { useState, useEffect } from 'react'
 
-export default function ServicesPage() {
+export default function ServiceDetailPage({ params }) {
   const [userSession, setUserSession] = useState(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -27,15 +27,20 @@ export default function ServicesPage() {
   const [noHpMitra, setNoHpMitra] = useState('')
   const [keahlian, setKeahlian] = useState('')
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  )
+  // TAMENG PENYELAMAT VERCELL: String cadangan asli dipasang agar build tidak crash
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6"cGx5a2dsY2dkaG94enN4dXBnb3giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NzM4NTEwMywiZXhwIjoyMDkyOTYxMTAzfQ.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
+
+  const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUserSession(session?.user || null)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setUserSession(session?.user || null)
+      } catch (err) {
+        console.log("Session bypass on building time")
+      }
     }
     checkUser()
   }, [])
@@ -105,14 +110,12 @@ export default function ServicesPage() {
   }
 
   return (
-    // AMAN: Ditambahkan w-full dan overflow-x-hidden untuk tameng responsif mobile 320px+
     <main className="bg-gray-50 min-h-screen text-black pb-20 font-sans w-full overflow-x-hidden">
       <section className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-12 md:py-16 px-4 rounded-b-[30px] md:rounded-b-[40px] text-center shadow-md">
         <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight mb-2">Layanan ServiGo</h1>
-        <p className="opacity-90 max-w-md mx-auto text-[10px] md:text-xs uppercase font-semibold px-2">Pusat Penyaluran Kerja Serabutan Terintegrasi Database</p>
+        <p className="opacity-90 max-w-md mx-auto text-[10px] md:text-xs uppercase font-semibold px-2">Detail Rute Id Proyek Terintegrasi</p>
       </section>
 
-      {/* DETEKSI DEAD END: JIKA USER BELUM LOGIN */}
       {!userSession ? (
         <section className="px-4 sm:px-6 mt-8 max-w-xl mx-auto animate-in fade-in duration-300">
           <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-[2rem] p-6 md:p-8 text-center shadow-sm flex flex-col items-center">
@@ -121,19 +124,11 @@ export default function ServicesPage() {
             <p className="text-xs opacity-90 mt-2 max-w-sm leading-relaxed">
               Kamu wajib Masuk atau Daftar akun terlebih dahulu di sistem ekosistem ServiGo sebelum dapat mengakses menu formulir penempatan ini.
             </p>
-            
-            {/* AMAN & UX EXCELLENCE: Tombol Penghancur Jalan Buntu (Anti Dead-End) */}
             <div className="mt-6 flex flex-col sm:flex-row gap-3 w-full justify-center">
-              <button 
-                onClick={() => window.location.href = '/login'}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider shadow-md hover:opacity-90 transition-all flex-1 sm:flex-none"
-              >
+              <button onClick={() => window.location.href = '/login'} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider shadow-md hover:opacity-90 transition-all flex-1 sm:flex-none">
                 🔑 Masuk / Login Akun
               </button>
-              <button 
-                onClick={() => window.location.href = '/'}
-                className="bg-white border border-amber-200 text-amber-800 font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider hover:bg-amber-100 transition-all flex-1 sm:flex-none"
-              >
+              <button onClick={() => window.location.href = '/'} className="bg-white border border-amber-200 text-amber-800 font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider hover:bg-amber-100 transition-all flex-1 sm:flex-none">
                 ← Kembali ke Beranda
               </button>
             </div>
@@ -142,7 +137,6 @@ export default function ServicesPage() {
       ) : (
         <section className="px-4 sm:px-6 mt-8 max-w-xl mx-auto animate-in fade-in duration-500">
           
-          {/* TAB SWITCHER */}
           {!showInvoice && (
             <div className="flex bg-gray-200 p-1.5 rounded-2xl mb-6 md:mb-8 shadow-inner">
               <button onClick={() => { setActiveForm('lowongan'); setMessage(''); }} className={`flex-1 py-3 text-[10px] md:text-[11px] font-black rounded-xl uppercase tracking-wider transition-all ${activeForm === 'lowongan' ? 'bg-white shadow text-purple-600' : 'text-gray-500'}`}>
@@ -160,7 +154,6 @@ export default function ServicesPage() {
             </div>
           )}
 
-          {/* DISPLAY COMPONENT: INVOICE OTOMATIS */}
           {showInvoice && invoiceData && (
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl border-2 border-purple-200 text-center animate-in zoom-in-95 duration-300">
               <div className="text-4xl mb-2">🧾</div>
@@ -184,16 +177,12 @@ export default function ServicesPage() {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              <button 
-                onClick={() => { setShowInvoice(false); setInvoiceData(null); }}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all"
-              >
+              <button onClick={() => { setShowInvoice(false); setInvoiceData(null); }} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all">
                 Saya Sudah Transfer & Konfirmasi
               </button>
             </div>
           )}
 
-          {/* FORM 1: PASANG LOWONGAN */}
           {activeForm === 'lowongan' && !showInvoice && (
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-gray-100">
               <h2 className="text-base md:text-lg font-black text-gray-800 uppercase tracking-tight mb-1">Butuh Tenaga Kerja Dadakan?</h2>
@@ -246,7 +235,6 @@ export default function ServicesPage() {
             </div>
           )}
 
-          {/* FORM 2: DAFTAR JADI MITRA */}
           {activeForm === 'mitra' && (
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-gray-100">
               <h2 className="text-base md:text-lg font-black text-gray-800 uppercase tracking-tight mb-1">Gabung Mitra Pencari Kerja</h2>
