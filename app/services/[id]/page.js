@@ -27,9 +27,9 @@ export default function ServiceDetailPage({ params }) {
   const [noHpMitra, setNoHpMitra] = useState('')
   const [keahlian, setKeahlian] = useState('')
 
-  // TAMENG PENYELAMAT VERCELL: String cadangan asli dipasang agar build tidak crash
+  // URL & KEY SUPABASE (Sudah dibersihkan dari tanda kutip bocor)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6"cGx5a2dsY2dkaG94enN4dXBnb3giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NzM4NTEwMywiZXhwIjoyMDkyOTYxMTAzfQ.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
 
   const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
@@ -77,10 +77,10 @@ export default function ServiceDetailPage({ params }) {
         biayaAdmin,
         biayaPrioritas,
         totalHarusDibayar,
-        nomorInvoice: 'INV-' + Math.floor(100000 + Math.random() * 900000)
+        nomorInvoice: 'INV-' + Math.floor(100000 + Math.random() * 900000),
+        namaPengirimData: namaPemberi
       })
       setShowInvoice(true)
-      // Note: Data namaPemberi tidak langsung di-reset di sini agar string namanya bisa terbaca oleh template teks WhatsApp
     }
     setLoading(false)
   }
@@ -177,19 +177,15 @@ export default function ServiceDetailPage({ params }) {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              {/* INTEGRASI TOMBOL KONFIRMASI WHATSAPP OTOMATIS */}
+              {/* TOMBOL LINK WHATSAPP */}
               <button 
                 onClick={() => {
-                  // GANTI DENGAN NOMOR HANDPHONE KAMU (Gunakan kode negara 62 di depan)
                   const nomorWA = "6285712345678" 
+                  const teksPesan = `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${invoiceData.namaPengirimData || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
                   
-                  // Template pesan teks rapi otomatis untuk dikirim ke WhatsApp
-                  const teksPesan = `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${namaPemberi || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
-                  
-                  // Membuka WhatsApp di tab browser baru
                   window.open(`https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(teksPesan)}`, '_blank')
 
-                  // Menutup invoice dan membersihkan input form di website
+                  // Reset layar invoice & form
                   setShowInvoice(false)
                   setInvoiceData(null)
                   setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
