@@ -27,7 +27,7 @@ export default function ServicesPage() {
   const [noHpMitra, setNoHpMitra] = useState('')
   const [keahlian, setKeahlian] = useState('')
 
-  // TAMENG PENYELAMAT: Menggunakan string kunci asli sebagai cadangan aman agar build Vercel lolos 100%
+  // TAMENG PENYELAMAT VERCEL
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6"cGx5a2dsY2dkaG94enN4dXBnb3giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NzM4NTEwMywiZXhwIjoyMDkyOTYxMTAzfQ.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
 
@@ -45,7 +45,7 @@ export default function ServicesPage() {
     checkUser()
   }, [])
 
-  // 1. AKSI: SIMPAN LOWONGAN + HITUNG INVOICE MANDIRI
+  // 1. AKSI: SIMPAN LOWONGAN
   const handleSimpanLowongan = async (e) => {
     e.preventDefault()
     if (!userSession) return
@@ -65,14 +65,13 @@ export default function ServicesPage() {
         lokasi: lokasiKerja, 
         gaji: `Rp ${totalHarusDibayar.toLocaleString('id-ID')}`,
         is_priority: isPriority,
-        status_bayar: 'Pending Verification' // Kolom penanda di admin nanti
+        status_bayar: 'Pending Verification'
       }
     ])
 
     if (error) {
       setMessage('❌ Gagal pasang lowongan: ' + error.message)
     } else {
-      // Tampilkan invoice otomatis di dalam web
       setInvoiceData({
         upahMurni,
         biayaAdmin,
@@ -81,20 +80,17 @@ export default function ServicesPage() {
         nomorInvoice: 'INV-' + Math.floor(100000 + Math.random() * 900000)
       })
       setShowInvoice(true)
-      
-      // Reset form input
       setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
     }
     setLoading(false)
   }
 
-  // 2. AKSI: DAFTAR MITRA OTOMATIS MASUK SUPABASE (Bukan lempar WA)
+  // 2. AKSI: DAFTAR MITRA
   const handleDaftarMitra = async (e) => {
     e.preventDefault()
     setLoading(true)
     setMessage('')
 
-    // *Pastikan kamu punya tabel bernama 'mitra' di Supabase kamu*
     const { error } = await supabase.from('mitra').insert([
       {
         nama_mitra: namaMitra,
@@ -114,7 +110,7 @@ export default function ServicesPage() {
   }
 
   return (
-    <main className="bg-gray-50 min-h-screen text-black pb-20 font-sans">
+    <main className="bg-gray-50 min-h-screen text-black pb-20 font-sans w-full overflow-x-hidden">
       <section className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-16 px-4 rounded-b-[40px] text-center shadow-md">
         <h1 className="text-3xl font-black uppercase tracking-tight mb-2">Layanan ServiGo</h1>
         <p className="opacity-90 max-w-md mx-auto text-xs uppercase font-semibold">Pusat Penyaluran Kerja Serabutan Terintegrasi Database</p>
@@ -131,7 +127,6 @@ export default function ServicesPage() {
       ) : (
         <section className="px-6 mt-8 max-w-xl mx-auto animate-in fade-in duration-500">
           
-          {/* TAB SWITCHER */}
           {!showInvoice && (
             <div className="flex bg-gray-200 p-1.5 rounded-2xl mb-8 shadow-inner">
               <button onClick={() => { setActiveForm('lowongan'); setMessage(''); }} className={`flex-1 py-3 text-[11px] font-black rounded-xl uppercase tracking-wider transition-all ${activeForm === 'lowongan' ? 'bg-white shadow text-purple-600' : 'text-gray-500'}`}>
@@ -149,7 +144,6 @@ export default function ServicesPage() {
             </div>
           )}
 
-          {/* DISPLAY COMPONENT: INVOICE OTOMATIS DI DALAM WEB */}
           {showInvoice && invoiceData && (
             <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-purple-200 text-center animate-in zoom-in-95 duration-300">
               <div className="text-4xl mb-2">🧾</div>
@@ -173,16 +167,12 @@ export default function ServicesPage() {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              <button 
-                onClick={() => { setShowInvoice(false); setInvoiceData(null); }}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all"
-              >
+              <button onClick={() => { setShowInvoice(false); setInvoiceData(null); }} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all">
                 Saya Sudah Transfer & Konfirmasi
               </button>
             </div>
           )}
 
-          {/* FORM 1: PASANG LOWONGAN */}
           {activeForm === 'lowongan' && !showInvoice && (
             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
               <h2 className="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">Butuh Tenaga Kerja Dadakan?</h2>
@@ -224,7 +214,7 @@ export default function ServicesPage() {
                     <p>• Biaya Pemeliharaan Aplikasi: Rp 2.500</p>
                     {isPriority && <p className="text-purple-600">• Fitur Akselerasi Prioritas: Rp 5.000</p>}
                     <div className="border-t border-dashed border-gray-200 my-2"></div>
-                    <p className="text-sm font-black text-gray-800">Total Biaya Invoice: Rp {(Number(gajiTawaran) + 2500 + (isPriority ? 5000 : 0)).toLocaleString('id-ID')}</p>
+                    <p className="text-xs md:text-sm font-black text-gray-800">Total Biaya Invoice: Rp {(Number(gajiTawaran) + 2500 + (isPriority ? 5000 : 0)).toLocaleString('id-ID')}</p>
                   </div>
                 )}
 
@@ -235,7 +225,6 @@ export default function ServicesPage() {
             </div>
           )}
 
-          {/* FORM 2: DAFTAR JADI MITRA (INTEGRASI DATABASES SUPABASE) */}
           {activeForm === 'mitra' && (
             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
               <h2 className="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">Gabung Mitra Pencari Kerja</h2>
@@ -265,8 +254,9 @@ export default function ServicesPage() {
         </section>
       )}
 
-      <footer className="text-center py-16 opacity-20 font-black text-[10px] uppercase tracking-[10px] mt-12">
-        ServiGo by Nara
+      {/* FOOTER BERSIH TANPA BRANDING LOGO */}
+      <footer className="text-center py-10 opacity-40 text-[10px] font-bold uppercase tracking-[6px] mt-12 border-t border-gray-100">
+        © {new Date().getFullYear()} ServiGo Indonesia. All Rights Reserved.
       </footer>
     </main>
   )
