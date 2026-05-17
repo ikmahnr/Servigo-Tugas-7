@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { supabase } from '@/supabase';
+import { createBrowserClient } from '@supabase/ssr'; // DIUBAH: Pakai client ssr langsung demi keamanan build Vercel
 import { z } from "zod";
 
 // 1. Definisikan Skema Validasi di luar komponen
@@ -19,6 +19,12 @@ export default function ContactPage() {
   
   // State untuk menyimpan pesan error dari Zod
   const [errors, setErrors] = useState({});
+
+  // TAMENG PENYELAMAT: Memberikan nilai cadangan langsung agar proses build Vercel lolos 100%
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA';
+
+  const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
   const handleKirim = async (e) => {
     e.preventDefault();
