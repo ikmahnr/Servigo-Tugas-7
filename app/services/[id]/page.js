@@ -1,8 +1,11 @@
 'use client'
 import { createBrowserClient } from '@supabase/ssr'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 
 export default function ServiceDetailPage({ params }) {
+  // Membongkar params secara aman sesuai standar Next.js App Router terbaru
+  const unwrappedParams = use(params)
+  
   const [userSession, setUserSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
@@ -10,13 +13,14 @@ export default function ServiceDetailPage({ params }) {
 
   // URL & KEY SUPABASE
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plykglcgdhoxzsxupgox.supabase.co'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPhtu00L3TEWgkfkVcJW5pVUA'
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBseWtnbGNnZGhveHpzeHVwZ294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODUxMDMsImV4cCI6MjA5Mjk2MTEwM30.T6r0iA82L8YrgJStA7gPToggle00L3TEWgkfkVcJW5pVUA'
 
   const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true)
+      setMessage('')
       
       // 1. Jalankan Cek Sesi Pengguna
       try {
@@ -32,18 +36,18 @@ export default function ServiceDetailPage({ params }) {
       }
 
       // 2. Ambil Data Lowongan Spesifik Berdasarkan ID dari URL
-      const targetId = params?.id
+      const targetId = unwrappedParams?.id
       if (targetId) {
         const { data, error } = await supabase
           .from('lowongan')
           .select('*')
           .eq('id', targetId)
-          .single() // Ambil satu data murni
+          .maybeSingle() // Menggunakan maybeSingle agar tidak melempar error crash jika data belum ketemu
 
         if (error) {
           setMessage('❌ Gagal memuat data tagihan: ' + error.message)
         } else if (data) {
-          // Bersihkan string nominal gaji dari DB (misal "Rp 157.500") untuk kalkulasi balik jika diperlukan rinciannya
+          // Bersihkan string nominal gaji dari DB (misal "Rp 157.500")
           const cleanGajiStr = data.gaji ? data.gaji.replace(/[^\d]/g, '') : '0'
           const totalHarusDibayar = Number(cleanGajiStr)
           
@@ -60,13 +64,15 @@ export default function ServiceDetailPage({ params }) {
             biayaPrioritas: biayaPrioritas,
             totalHarusDibayar: totalHarusDibayar
           })
+        } else {
+          setMessage('⚠️ ID Transaksi ini tidak ditemukan di database local/production kamu.')
         }
       }
       setLoading(false)
     }
 
     initializeData()
-  }, [params?.id])
+  }, [unwrappedParams?.id])
 
   return (
     <main className="bg-gray-50 min-h-screen text-black pb-20 font-sans w-full overflow-x-hidden">
@@ -135,11 +141,10 @@ export default function ServiceDetailPage({ params }) {
                 rel="noopener noreferrer"
                 onClick={() => {
                   setTimeout(() => {
-                    // Setelah klik konfirmasi, arahkan kembali ke beranda/layanan agar antrean bersih
                     window.location.href = '/services'
                   }, 1550)
                 }} 
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 block text-center animate-pulse"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 block text-center"
               >
                 Saya Sudah Transfer & Konfirmasi
               </a>
