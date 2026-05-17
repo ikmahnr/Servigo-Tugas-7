@@ -1,0 +1,27 @@
+{
+  "name": "servigo-baru",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
+    "next": "16.2.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "tailwindcss": "^4"
+  }
+}
