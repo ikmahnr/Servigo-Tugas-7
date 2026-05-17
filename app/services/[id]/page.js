@@ -177,23 +177,25 @@ export default function ServiceDetailPage({ params }) {
                 <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Atas Nama: PT SERVIGO INDONESIA</p>
               </div>
 
-              {/* TOMBOL LINK WHATSAPP */}
-              <button 
+              {/* REPARASI TOMBOL: MENGGUNAKAN HTML LINK MURNI AGAR TIDAK DIBLOKIR BROWSER */}
+              <a 
+                href={`https://api.whatsapp.com/send?phone=6285712345678&text=${encodeURIComponent(
+                  `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${invoiceData.namaPengirimData || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => {
-                  const nomorWA = "6285712345678" 
-                  const teksPesan = `Halo Admin ServiGo,\n\nSaya telah melakukan transfer untuk invoice berikut:\n\n• *Nomor Invoice:* ${invoiceData.nomorInvoice}\n• *Total Tagihan:* Rp ${invoiceData.totalHarusDibayar.toLocaleString('id-ID')}\n• *Nama Pengirim:* ${invoiceData.namaPengirimData || 'Pemberi Tugas'}\n\nBerikut saya lampirkan foto bukti transfernya untuk segera diverifikasi. Terima kasih! 🙏`
-                  
-                  window.open(`https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(teksPesan)}`, '_blank')
-
-                  // Reset layar invoice & form
-                  setShowInvoice(false)
-                  setInvoiceData(null)
-                  setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
+                  // Berikan jeda waktu agar browser sempat membuka halaman WA sebelum form di-clear
+                  setTimeout(() => {
+                    setShowInvoice(false)
+                    setInvoiceData(null)
+                    setNamaPemberi(''); setKontakPemberi(''); setButuhJasa(''); setLokasiKerja(''); setGajiTawaran(''); setIsPriority(false);
+                  }, 500)
                 }} 
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-xs py-4 rounded-xl uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 block text-center"
               >
-                📱 Kirim Bukti & Konfirmasi via WhatsApp
-              </button>
+                Saya Sudah Transfer & Konfirmasi
+              </a>
             </div>
           )}
 
